@@ -7,7 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#define BLOCK_SIZE 30
+#define BLOCK_SIZE 35
 #define SCREEN_WIDTH BLOCK_SIZE * SCREEN_X
 #define SCREEN_HEIGHT BLOCK_SIZE * SCREEN_Y
 #define WINDOW_TITLE "Mineswipper on SDL2"
@@ -33,16 +33,16 @@ static SDL_Window* window;
 static SDL_Renderer* renderer;
 static SDL_Event event;
 
-static const struct SDL_Color renderer_colour_red = { 196, 54, 56 };
-static const struct SDL_Color renderer_colour_orange = { 230, 100, 20 };
-static const struct SDL_Color renderer_colour_yellow = { 224, 204, 26 };
-static const struct SDL_Color renderer_colour_green = { 24, 226, 112 };
-static const struct SDL_Color renderer_colour_blue = { 26, 189, 224 };
-static const struct SDL_Color renderer_colour_deep_blue = { 25, 90, 225 };
-static const struct SDL_Color renderer_colour_violet = { 169, 27, 222 };
-static const struct SDL_Color renderer_colour_black = { 0, 0, 0 };
-static const struct SDL_Color renderer_colour_white = { 255, 255, 255 };
-struct SDL_Color background_colour = renderer_colour_white;
+static const struct SDL_Color colour_red = { 196, 54, 56 };
+static const struct SDL_Color colour_orange = { 230, 100, 20 };
+static const struct SDL_Color colour_yellow = { 224, 204, 26 };
+static const struct SDL_Color colour_green = { 24, 226, 112 };
+static const struct SDL_Color colour_blue = { 26, 189, 224 };
+static const struct SDL_Color colour_deep_blue = { 25, 90, 225 };
+static const struct SDL_Color colour_violet = { 169, 27, 222 };
+static const struct SDL_Color colour_black = { 0, 0, 0 };
+static const struct SDL_Color colour_white = { 255, 255, 255 };
+struct SDL_Color background_colour = colour_white;
 
 int click_x = 0;
 int click_y = 0;
@@ -95,15 +95,15 @@ int renderer_init(void) {
         return -1;
     }
 
-    messages[0] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "1", renderer_colour_white));
-    messages[1] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "2", renderer_colour_white));
-    messages[2] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "3", renderer_colour_white));
-    messages[3] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "4", renderer_colour_white));
-    messages[4] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "5", renderer_colour_white));
-    messages[5] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "6", renderer_colour_white));
-    messages[6] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "7", renderer_colour_white));
-    messages[7] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "8", renderer_colour_white));
-    messages[8] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "9", renderer_colour_white));
+    messages[0] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "1", colour_white));
+    messages[1] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "2", colour_white));
+    messages[2] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "3", colour_white));
+    messages[3] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "4", colour_white));
+    messages[4] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "5", colour_white));
+    messages[5] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "6", colour_white));
+    messages[6] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "7", colour_white));
+    messages[7] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "8", colour_white));
+    messages[8] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "9", colour_white));
 
     SDL_SetRenderDrawColor(renderer, background_colour.r, background_colour.g, background_colour.b, 255);
 }
@@ -118,23 +118,23 @@ void renderer_render(char *a) {
             char s = *(a + x * SCREEN_Y + y);
             switch(s) {
                 case TYPE_MARK:
-                    colour = renderer_colour_blue;
+                    colour = colour_blue;
                     message = NULL;
                     break;
                 case TYPE_MINE:
-                    colour = renderer_colour_red;
+                    colour = colour_red;
                     message = NULL;
                     break;
                 case TYPE_UNKNOWN:
-                    colour = renderer_colour_white;
+                    colour = colour_white;
                     message = NULL;
                     break;
                 case TYPE_EMPTY:
-                    colour = renderer_colour_black;
+                    colour = colour_black;
                     message = NULL;
                     break;
                 default:
-                    colour = renderer_colour_black;
+                    colour = colour_black;
                     message = messages[s - 1];
                     break;
             }
