@@ -29,11 +29,6 @@ enum Event {
     EVENT_BLOCK_MARK
 };
 
-struct Position {
-    char x;
-    char y;
-};
-
 static SDL_Window* window;
 static SDL_Renderer* renderer;
 static SDL_Event event;
@@ -73,11 +68,7 @@ enum Event renderer_get_event() {
     return EVENT_EMPTY;
 }
 
-void renderer_get_click(struct Position *position) {
-    position->x = click_x;
-    position->y = click_y;
-}
-
+SDL_Texture* messages[9];
 
 int renderer_init(void) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
@@ -85,6 +76,8 @@ int renderer_init(void) {
         return -1;
     }
     TTF_Init();
+    TTF_Font* Sans = TTF_OpenFont("font.ttf", 100);
+
     window = SDL_CreateWindow(WINDOW_TITLE,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -102,6 +95,16 @@ int renderer_init(void) {
         return -1;
     }
 
+    messages[0] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "1", renderer_colour_white));
+    messages[1] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "2", renderer_colour_white));
+    messages[2] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "3", renderer_colour_white));
+    messages[3] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "4", renderer_colour_white));
+    messages[4] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "5", renderer_colour_white));
+    messages[5] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "6", renderer_colour_white));
+    messages[6] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "7", renderer_colour_white));
+    messages[7] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "8", renderer_colour_white));
+    messages[8] = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(Sans, "9", renderer_colour_white));
+
     SDL_SetRenderDrawColor(renderer, background_colour.r, background_colour.g, background_colour.b, 255);
 }
 
@@ -111,65 +114,52 @@ void renderer_render(char *a) {
 	for (int x = 0; x < SCREEN_X; ++x) {
 	    for (int y = 0; y < SCREEN_Y; ++y) {
             struct SDL_Color colour;
-            SDL_Texture* Message;
-            bool has_colour = true;
+            SDL_Texture* message;
             char s = *(a + x * SCREEN_Y + y);
             switch(s) {
                 case COLOUR_MARK:
                     colour = renderer_colour_blue;
-                    Message = NULL;
+                    message = NULL;
                     break;
                 case COLOUR_MINE:
                     colour = renderer_colour_red;
-                    Message = NULL;
+                    message = NULL;
                     break;
                 case COLOUR_UNKNOWN:
                     colour = renderer_colour_white;
-                    Message = NULL;
+                    message = NULL;
                     break;
                 case COLOUR_EMPTY:
                     colour = renderer_colour_black;
-                    Message = NULL;
+                    message = NULL;
                     break;
                 default:
                     colour = renderer_colour_black;
-
-                    TTF_Font* Sans = TTF_OpenFont("font.ttf", 100);
-
-                    SDL_Color White = {255, 255, 255};
-
-                    char str[1];
-                    sprintf(str, "%d", s);
-
-                    SDL_Surface* surfaceMessage =
-                        TTF_RenderText_Solid(Sans, str, White); 
-
-                    Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+                    message = messages[s - 1];
                     break;
             }
-            if (has_colour) {
-                SDL_Rect rect;
-                rect.x = 0 + x * BRICK_SIZE;
-                rect.y = 0 + y * BRICK_SIZE;
-                rect.w = BRICK_SIZE;
-                rect.h = BRICK_SIZE;
 
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
-                SDL_RenderDrawRect(renderer, &rect);
-                rect.x += 2;
-                rect.y += 2;
-                rect.w -= 4;
-                rect.h -= 4;
-                SDL_SetRenderDrawColor(renderer, colour.r, colour.g, colour.b, 80);
-                SDL_RenderFillRect(renderer, &rect);
+            SDL_Rect rect;
+            rect.x = 0 + x * BRICK_SIZE;
+            rect.y = 0 + y * BRICK_SIZE;
+            rect.w = BRICK_SIZE;
+            rect.h = BRICK_SIZE;
 
-                if (Message != NULL) {
-                    rect.x += 4;
-                    rect.y += 4;
-                    rect.w -= 8;
-                    rect.h -= 8;
-                    SDL_RenderCopy(renderer, Message, NULL, &rect);
-                }
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
+            SDL_RenderDrawRect(renderer, &rect);
+            rect.x += 2;
+            rect.y += 2;
+            rect.w -= 4;
+            rect.h -= 4;
+            SDL_SetRenderDrawColor(renderer, colour.r, colour.g, colour.b, 80);
+            SDL_RenderFillRect(renderer, &rect);
+
+            if (message != NULL) {
+                rect.x += 4;
+                rect.y += 4;
+                rect.w -= 8;
+                rect.h -= 8;
+                SDL_RenderCopy(renderer, message, NULL, &rect);
             }
 	    }
 	}
@@ -253,7 +243,6 @@ int main(int argc, char** argv) {
 
     while (running) {
         enum Event event = EVENT_EMPTY;
-        struct Position position;
         do {
             event = renderer_get_event();
             switch(event) {
@@ -261,16 +250,14 @@ int main(int argc, char** argv) {
                     running = false;
                     break;
                 case EVENT_BLOCK_TRY:
-                    renderer_get_click(&position);
-                    open_board(screen, board, position.x, position.y);
+                    open_board(screen, board, click_x, click_y);
                     renderer_render((char *) screen);
                     break;
                 case EVENT_BLOCK_MARK:
-                    renderer_get_click(&position);
-                    if (screen[position.x][position.y] == COLOUR_UNKNOWN) {
-                        screen[position.x][position.y] = COLOUR_MARK;
-                    } else if (screen[position.x][position.y] == COLOUR_MARK) {
-                        screen[position.x][position.y] = COLOUR_UNKNOWN;
+                    if (screen[click_x][click_y] == COLOUR_UNKNOWN) {
+                        screen[click_x][click_y] = COLOUR_MARK;
+                    } else if (screen[click_x][click_y] == COLOUR_MARK) {
+                        screen[click_x][click_y] = COLOUR_UNKNOWN;
                     }
                     renderer_render((char *) screen);
                     break;
