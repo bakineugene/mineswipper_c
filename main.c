@@ -22,16 +22,13 @@ enum Block_Types {
     TYPE_MARK = 12,
 };
 
-enum Event {
-    EVENT_EMPTY,
-    EVENT_EXIT,
-    EVENT_BLOCK_TRY,
-    EVENT_BLOCK_MARK
-};
+/**
+    SDL specific part
+*/
 
-static SDL_Window* window;
-static SDL_Renderer* renderer;
-static SDL_Event event;
+/**
+    Colour palette
+*/
 
 static const struct SDL_Color colour_red = { 196, 54, 56 };
 static const struct SDL_Color colour_orange = { 230, 100, 20 };
@@ -44,10 +41,22 @@ static const struct SDL_Color colour_black = { 0, 0, 0 };
 static const struct SDL_Color colour_white = { 255, 255, 255 };
 struct SDL_Color background_colour = colour_white;
 
+/**
+    Converting SDL events to in game events
+*/
+
 int click_x = 0;
 int click_y = 0;
 
+enum Event {
+    EVENT_EMPTY,
+    EVENT_EXIT,
+    EVENT_BLOCK_TRY,
+    EVENT_BLOCK_MARK
+};
+
 enum Event renderer_get_event() {
+    static SDL_Event event;
     if (SDL_PollEvent(&event)) {
         switch(event.type) {
             case SDL_QUIT:
@@ -68,7 +77,13 @@ enum Event renderer_get_event() {
     return EVENT_EMPTY;
 }
 
+/**
+    Textures for 1 - 9 numbers
+*/
 SDL_Texture* messages[9];
+
+static SDL_Window* window;
+static SDL_Renderer* renderer;
 
 int renderer_init(void) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
