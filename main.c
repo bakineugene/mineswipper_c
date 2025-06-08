@@ -16,10 +16,10 @@
 #define SCREEN_Y 9
 
 enum Block_Types {
-    COLOUR_EMPTY = 0,
-    COLOUR_UNKNOWN = 10,
-    COLOUR_MINE = 11,
-    COLOUR_MARK = 12,
+    TYPE_EMPTY = 0,
+    TYPE_UNKNOWN = 10,
+    TYPE_MINE = 11,
+    TYPE_MARK = 12,
 };
 
 enum Event {
@@ -117,19 +117,19 @@ void renderer_render(char *a) {
             SDL_Texture* message;
             char s = *(a + x * SCREEN_Y + y);
             switch(s) {
-                case COLOUR_MARK:
+                case TYPE_MARK:
                     colour = renderer_colour_blue;
                     message = NULL;
                     break;
-                case COLOUR_MINE:
+                case TYPE_MINE:
                     colour = renderer_colour_red;
                     message = NULL;
                     break;
-                case COLOUR_UNKNOWN:
+                case TYPE_UNKNOWN:
                     colour = renderer_colour_white;
                     message = NULL;
                     break;
-                case COLOUR_EMPTY:
+                case TYPE_EMPTY:
                     colour = renderer_colour_black;
                     message = NULL;
                     break;
@@ -186,7 +186,7 @@ void open_board(char screen[SCREEN_X][SCREEN_Y], char board[SCREEN_X][SCREEN_Y],
         screen[x][y] = board[x][y];
         return;
     }
-    if (board[x][y] == COLOUR_MINE) {
+    if (board[x][y] == TYPE_MINE) {
         memcpy(screen, board, SCREEN_X * SCREEN_Y * sizeof(char));
         return;
     }
@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
     for (int x = 0; x < SCREEN_X; ++x) {
         for (int y = 0; y < SCREEN_Y; ++y) {
             board[x][y] = 0;
-            screen[x][y] = COLOUR_UNKNOWN;
+            screen[x][y] = TYPE_UNKNOWN;
         }
     }
 
@@ -224,11 +224,11 @@ int main(int argc, char** argv) {
         for (int y = 0; y < SCREEN_Y; ++y) {
             char random_cell = rand() % (number_of_clear_fields + number_of_mines) + 1;
             if (random_cell <= number_of_mines) {
-	            board[x][y] = COLOUR_MINE;
+	            board[x][y] = TYPE_MINE;
                 --number_of_mines;
                 for (int i = -1; i <= 1; ++i) {
                     for (int j = -1; j <= 1; ++j) {
-                        if (x + i >= 0 && x + i < SCREEN_X && y + j >= 0 && y + j < SCREEN_Y && board[x+i][y+j] != COLOUR_MINE) {
+                        if (x + i >= 0 && x + i < SCREEN_X && y + j >= 0 && y + j < SCREEN_Y && board[x+i][y+j] != TYPE_MINE) {
                             ++board[x+i][y+j];
                         }
                     }
@@ -254,10 +254,10 @@ int main(int argc, char** argv) {
                     renderer_render((char *) screen);
                     break;
                 case EVENT_BLOCK_MARK:
-                    if (screen[click_x][click_y] == COLOUR_UNKNOWN) {
-                        screen[click_x][click_y] = COLOUR_MARK;
-                    } else if (screen[click_x][click_y] == COLOUR_MARK) {
-                        screen[click_x][click_y] = COLOUR_UNKNOWN;
+                    if (screen[click_x][click_y] == TYPE_UNKNOWN) {
+                        screen[click_x][click_y] = TYPE_MARK;
+                    } else if (screen[click_x][click_y] == TYPE_MARK) {
+                        screen[click_x][click_y] = TYPE_UNKNOWN;
                     }
                     renderer_render((char *) screen);
                     break;
