@@ -7,7 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#define BRICK_SIZE 50
+#define BRICK_SIZE 30
 #define SCREEN_WIDTH BRICK_SIZE * SCREEN_X
 #define SCREEN_HEIGHT BRICK_SIZE * SCREEN_Y
 #define WINDOW_TITLE "Mineswipper on SDL2"
@@ -16,6 +16,7 @@
 #define SCREEN_Y 9
 
 enum Colour {
+    COLOUR_EMPTY = 0,
     COLOUR_UNKNOWN = 10,
     COLOUR_MINE = 11,
     COLOUR_MARK = 12,
@@ -46,7 +47,7 @@ static const struct SDL_Color renderer_colour_deep_blue = { 25, 90, 225 };
 static const struct SDL_Color renderer_colour_violet = { 169, 27, 222 };
 static const struct SDL_Color renderer_colour_black = { 0, 0, 0 };
 static const struct SDL_Color renderer_colour_white = { 255, 255, 255 };
-
+struct SDL_Color background_colour = renderer_colour_white;
 
 int click_x = 0;
 int click_y = 0;
@@ -77,16 +78,13 @@ void renderer_get_click(struct Position *position) {
     position->y = click_y;
 }
 
-struct SDL_Color background_colour = renderer_colour_white;
 
 int renderer_init(void) {
-    /* Initializing SDL2 */
     if (SDL_Init(SDL_INIT_VIDEO)) {
         printf("Unable to initialize SDL: %s\n", SDL_GetError());
         return -1;
     }
     TTF_Init();
-    /* Creating a SDL window */
     window = SDL_CreateWindow(WINDOW_TITLE,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -96,7 +94,6 @@ int renderer_init(void) {
         return -1;
     }
 
-    /* Creating a renderer */
     renderer = SDL_CreateRenderer(window, -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
@@ -118,26 +115,26 @@ void renderer_render(char *a) {
             bool has_colour = true;
             char s = *(a + x * SCREEN_Y + y);
             switch(s) {
-                case 12:
+                case COLOUR_MARK:
                     colour = renderer_colour_blue;
                     Message = NULL;
                     break;
-                case 11:
+                case COLOUR_MINE:
                     colour = renderer_colour_red;
                     Message = NULL;
                     break;
-                case 10:
+                case COLOUR_UNKNOWN:
                     colour = renderer_colour_white;
                     Message = NULL;
                     break;
-                case 0:
+                case COLOUR_EMPTY:
                     colour = renderer_colour_black;
                     Message = NULL;
                     break;
                 default:
                     colour = renderer_colour_black;
 
-                    TTF_Font* Sans = TTF_OpenFont("font4.ttf", 100);
+                    TTF_Font* Sans = TTF_OpenFont("font.ttf", 100);
 
                     SDL_Color White = {255, 255, 255};
 
@@ -192,13 +189,6 @@ void renderer_destroy() {
 }
 bool running = true;
 
-char MINE = 11;
-
-enum Direction {
-    DIR_CLICK = 0,
-};
-
-
 void open_board(char screen[SCREEN_X][SCREEN_Y], char board[SCREEN_X][SCREEN_Y], char x, char y) {
     if (x < 0 || x >= SCREEN_X || y < 0 || y >= SCREEN_Y) return;
 
@@ -206,7 +196,7 @@ void open_board(char screen[SCREEN_X][SCREEN_Y], char board[SCREEN_X][SCREEN_Y],
         screen[x][y] = board[x][y];
         return;
     }
-    if (board[x][y] == MINE) {
+    if (board[x][y] == COLOUR_MINE) {
         memcpy(screen, board, SCREEN_X * SCREEN_Y * sizeof(char));
         return;
     }
@@ -216,15 +206,11 @@ void open_board(char screen[SCREEN_X][SCREEN_Y], char board[SCREEN_X][SCREEN_Y],
 
     screen[x][y] = board[x][y];
 
-    open_board(screen, board, x, y - 1);
-    open_board(screen, board, x - 1, y);
-    open_board(screen, board, x, y + 1);
-    open_board(screen, board, x + 1, y);
-
-    open_board(screen, board, x + 1, y + 1);
-    open_board(screen, board, x - 1, y + 1);
-    open_board(screen, board, x + 1, y - 1);
-    open_board(screen, board, x - 1, y - 1);
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            open_board(screen, board, x + i, y + j);
+        }
+    }
 }
 
 int main(int argc, char** argv) {
@@ -248,11 +234,11 @@ int main(int argc, char** argv) {
         for (int y = 0; y < SCREEN_Y; ++y) {
             char random_cell = rand() % (number_of_clear_fields + number_of_mines) + 1;
             if (random_cell <= number_of_mines) {
-	            board[x][y] = MINE;
+	            board[x][y] = COLOUR_MINE;
                 --number_of_mines;
                 for (int i = -1; i <= 1; ++i) {
                     for (int j = -1; j <= 1; ++j) {
-                        if (x + i >= 0 && x + i < SCREEN_X && y + j >= 0 && y + j < SCREEN_Y && board[x+i][y+j] != MINE) {
+                        if (x + i >= 0 && x + i < SCREEN_X && y + j >= 0 && y + j < SCREEN_Y && board[x+i][y+j] != COLOUR_MINE) {
                             ++board[x+i][y+j];
                         }
                     }
