@@ -12,8 +12,9 @@
 #define SCREEN_HEIGHT BLOCK_SIZE * SCREEN_Y
 #define WINDOW_TITLE "Mineswipper on SDL2"
 
-#define SCREEN_X 9
-#define SCREEN_Y 9
+#define SCREEN_X 16
+#define SCREEN_Y 16
+#define NUMBER_OF_MINES 40
 
 enum Block_Types {
     TYPE_EMPTY = 0,
@@ -252,8 +253,8 @@ int main(int argc, char** argv) {
     */
     char board[SCREEN_X][SCREEN_Y];
     char screen[SCREEN_X][SCREEN_Y];
-    char number_of_mines = 10;
-    char number_of_clear_fields = SCREEN_X * SCREEN_Y - number_of_mines;
+    int number_of_mines = NUMBER_OF_MINES;
+    int number_of_clear_fields = SCREEN_X * SCREEN_Y - number_of_mines;
 
     for (int x = 0; x < SCREEN_X; ++x) {
         for (int y = 0; y < SCREEN_Y; ++y) {
@@ -264,7 +265,7 @@ int main(int argc, char** argv) {
 
     for (int x = 0; x < SCREEN_X; ++x) {
         for (int y = 0; y < SCREEN_Y; ++y) {
-            char random_cell = rand() % (number_of_clear_fields + number_of_mines) + 1;
+            int random_cell = rand() % (number_of_clear_fields + number_of_mines) + 1;
             if (random_cell <= number_of_mines) {
 	            board[x][y] = TYPE_MINE;
                 --number_of_mines;
