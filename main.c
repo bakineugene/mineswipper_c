@@ -7,15 +7,15 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#define BRICK_SIZE 30
-#define SCREEN_WIDTH BRICK_SIZE * SCREEN_X
-#define SCREEN_HEIGHT BRICK_SIZE * SCREEN_Y
+#define BLOCK_SIZE 30
+#define SCREEN_WIDTH BLOCK_SIZE * SCREEN_X
+#define SCREEN_HEIGHT BLOCK_SIZE * SCREEN_Y
 #define WINDOW_TITLE "Mineswipper on SDL2"
 
 #define SCREEN_X 9
 #define SCREEN_Y 9
 
-enum Colour {
+enum Block_Types {
     COLOUR_EMPTY = 0,
     COLOUR_UNKNOWN = 10,
     COLOUR_MINE = 11,
@@ -54,8 +54,8 @@ enum Event renderer_get_event() {
                 return EVENT_EXIT;
 
             case SDL_MOUSEBUTTONUP:
-                click_x = event.button.x / BRICK_SIZE;
-                click_y = event.button.y / BRICK_SIZE;
+                click_x = event.button.x / BLOCK_SIZE;
+                click_y = event.button.y / BLOCK_SIZE;
                 if (event.button.button == SDL_BUTTON_LEFT) {
                     return EVENT_BLOCK_TRY;
                 }
@@ -140,10 +140,10 @@ void renderer_render(char *a) {
             }
 
             SDL_Rect rect;
-            rect.x = 0 + x * BRICK_SIZE;
-            rect.y = 0 + y * BRICK_SIZE;
-            rect.w = BRICK_SIZE;
-            rect.h = BRICK_SIZE;
+            rect.x = 0 + x * BLOCK_SIZE;
+            rect.y = 0 + y * BLOCK_SIZE;
+            rect.w = BLOCK_SIZE;
+            rect.h = BLOCK_SIZE;
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
             SDL_RenderDrawRect(renderer, &rect);
