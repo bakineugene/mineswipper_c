@@ -21,7 +21,6 @@ enum Colour {
     COLOUR_MARK = 12,
 };
 
-
 enum Event {
     EVENT_EMPTY,
     EVENT_EXIT,
@@ -38,21 +37,15 @@ static SDL_Window* window;
 static SDL_Renderer* renderer;
 static SDL_Event event;
 
-struct SDLColour {
-    char red;
-    char green;
-    char blue;
-};
-
-static const struct SDLColour renderer_colour_red = { 196, 54, 56 };
-static const struct SDLColour renderer_colour_orange = { 230, 100, 20 };
-static const struct SDLColour renderer_colour_yellow = { 224, 204, 26 };
-static const struct SDLColour renderer_colour_green = { 24, 226, 112 };
-static const struct SDLColour renderer_colour_blue = { 26, 189, 224 };
-static const struct SDLColour renderer_colour_deep_blue = { 25, 90, 225 };
-static const struct SDLColour renderer_colour_violet = { 169, 27, 222 };
-static const struct SDLColour renderer_colour_black = { 0, 0, 0 };
-static const struct SDLColour renderer_colour_white = { 255, 255, 255 };
+static const struct SDL_Color renderer_colour_red = { 196, 54, 56 };
+static const struct SDL_Color renderer_colour_orange = { 230, 100, 20 };
+static const struct SDL_Color renderer_colour_yellow = { 224, 204, 26 };
+static const struct SDL_Color renderer_colour_green = { 24, 226, 112 };
+static const struct SDL_Color renderer_colour_blue = { 26, 189, 224 };
+static const struct SDL_Color renderer_colour_deep_blue = { 25, 90, 225 };
+static const struct SDL_Color renderer_colour_violet = { 169, 27, 222 };
+static const struct SDL_Color renderer_colour_black = { 0, 0, 0 };
+static const struct SDL_Color renderer_colour_white = { 255, 255, 255 };
 
 
 int click_x = 0;
@@ -84,7 +77,7 @@ void renderer_get_click(struct Position *position) {
     position->y = click_y;
 }
 
-struct SDLColour background_colour = renderer_colour_white;
+struct SDL_Color background_colour = renderer_colour_white;
 
 int renderer_init(void) {
     /* Initializing SDL2 */
@@ -112,7 +105,7 @@ int renderer_init(void) {
         return -1;
     }
 
-    SDL_SetRenderDrawColor(renderer, background_colour.red, background_colour.green, background_colour.blue, 255);
+    SDL_SetRenderDrawColor(renderer, background_colour.r, background_colour.g, background_colour.b, 255);
 }
 
 void renderer_render(char *a) {
@@ -120,7 +113,7 @@ void renderer_render(char *a) {
 
 	for (int x = 0; x < SCREEN_X; ++x) {
 	    for (int y = 0; y < SCREEN_Y; ++y) {
-            struct SDLColour colour;
+            struct SDL_Color colour;
             SDL_Texture* Message;
             bool has_colour = true;
             char s = *(a + x * SCREEN_Y + y);
@@ -170,7 +163,7 @@ void renderer_render(char *a) {
                 rect.y += 2;
                 rect.w -= 4;
                 rect.h -= 4;
-                SDL_SetRenderDrawColor(renderer, colour.red, colour.green, colour.blue, 80);
+                SDL_SetRenderDrawColor(renderer, colour.r, colour.g, colour.b, 80);
                 SDL_RenderFillRect(renderer, &rect);
 
                 if (Message != NULL) {
@@ -183,21 +176,8 @@ void renderer_render(char *a) {
             }
 	    }
 	}
-    /**
-    SDL_SetRenderDrawColor(renderer, 111, 105, 145, 255);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	for (int x = 0; x < 1 + SCREEN_X * 8 * 5; x += 8 * 5) {
-        SDL_RenderDrawLine(renderer, x, 0, x, SCREEN_HEIGHT);
-    }
+    SDL_SetRenderDrawColor(renderer, background_colour.r, background_colour.g, background_colour.b, 255);
 
-	for (int y = 0; y < 1 + SCREEN_Y * 8 * 5; y += 8 * 5) {
-        SDL_RenderDrawLine(renderer, 0, y, SCREEN_WIDTH, y);
-    }
-    */
-    // SDL_SetRenderDrawColor(renderer, 110, 177, 255, 255);
-    SDL_SetRenderDrawColor(renderer, background_colour.red, background_colour.green, background_colour.blue, 255);
-
-    /* Showing what was drawn */
     SDL_RenderPresent(renderer);
 }
 
