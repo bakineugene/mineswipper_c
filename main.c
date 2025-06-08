@@ -130,8 +130,8 @@ void renderer_render(char *a) {
 	    for (int y = 0; y < SCREEN_Y; ++y) {
             struct SDL_Color colour;
             SDL_Texture* message;
-            char s = *(a + x * SCREEN_Y + y);
-            switch(s) {
+            char block = *(a + x * SCREEN_Y + y);
+            switch(block) {
                 case TYPE_MARK:
                     colour = colour_blue;
                     message = NULL;
@@ -150,7 +150,7 @@ void renderer_render(char *a) {
                     break;
                 default:
                     colour = colour_black;
-                    message = messages[s - 1];
+                    message = messages[block - 1];
                     break;
             }
 
@@ -183,34 +183,58 @@ void renderer_render(char *a) {
     SDL_RenderPresent(renderer);
 }
 
-void renderer_delay(int delay) {
-    SDL_Delay(delay);
-}
-
 void renderer_destroy() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
-bool running = true;
 
+/**
+    Game specific part
+*/
+
+/**
+    Opens part of board on player click 
+    When clicking on empty block - also opens every attached block
+
+    recursive function
+*/
 void open_board(char screen[SCREEN_X][SCREEN_Y], char board[SCREEN_X][SCREEN_Y], char x, char y) {
-    if (x < 0 || x >= SCREEN_X || y < 0 || y >= SCREEN_Y) return;
+    /**
+        Check for out of bounds
+    */
+    if (x < 0 || x >= SCREEN_X || y < 0 || y >= SCREEN_Y) {
+        return;
+    }
 
+    /**
+        Number block simply opens itself
+    */
     if (board[x][y] > 0 && board[x][y] <= 9) {
         screen[x][y] = board[x][y];
         return;
     }
+
+    /**
+        Mine block opens everything and ends game
+    */
     if (board[x][y] == TYPE_MINE) {
         memcpy(screen, board, SCREEN_X * SCREEN_Y * sizeof(char));
         return;
     }
+
+    /**
+        If block is already opened - nothing to be done
+    */
     if (board[x][y] == screen[x][y]) {
         return;
     }
 
+    /**
+        Only empty blocks left
+        Open it - and try to open every attached block recursivly
+    */
     screen[x][y] = board[x][y];
-
     for (int i = -1; i <= 1; ++i) {
         for (int j = -1; j <= 1; ++j) {
             open_board(screen, board, x + i, y + j);
@@ -223,6 +247,9 @@ int main(int argc, char** argv) {
     
     renderer_init();
 
+    /**
+        Init game - fill game board with mines
+    */
     char board[SCREEN_X][SCREEN_Y];
     char screen[SCREEN_X][SCREEN_Y];
     char number_of_mines = 10;
@@ -256,6 +283,11 @@ int main(int argc, char** argv) {
 
     renderer_render((char *) screen);
 
+    /**
+        Main cycle - wait for events and handle them
+    */
+
+    bool running = true;
     while (running) {
         enum Event event = EVENT_EMPTY;
         do {
